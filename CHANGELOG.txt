@@ -1,0 +1,7 @@
+Changes on 2025-10-29:
+- Updated system.js: handleAddCategoryClick now saves bulk meta fields (account number, monthly bill,
+  officer telephone, supplier name, and location) along with the quantity.
+- For bulk categories, de-duplication is now by (category + account number), so you can add multiple
+  quantities under the same category for different account numbers, keeping other info intact.
+- After adding a bulk entry, the account number and quantity fields are reset for quick data entry,
+  while supplier name/location/monthly bill/officer tel are preserved as requested.

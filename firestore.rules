@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // HRM
+    match /hrmSheets/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Scheme
+    match /schemeExtended/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Labs
+    match /labsSubmissions/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Plant
+    match /plantSubmissions/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Admin config (regions/locations merge maps, etc.)
+    match /adminConfig/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Dashboard aggregates (optional public reads)
+    match /dashboardStats/{docId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Per-user docs (if you add any later)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

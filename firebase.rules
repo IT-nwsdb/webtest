@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Authentication
+    function isSignedIn() { return request.auth != null; }
+
+    // Existing modules
+    match /hrmSheets/{docId} { allow read, write: if isSignedIn(); }
+    match /schemeExtended/{docId} { allow read, write: if isSignedIn(); }
+    match /labsSubmissions/{docId} { allow read, write: if isSignedIn(); }
+    match /plantSubmissions/{docId} { allow read, write: if isSignedIn(); }
+
+    // Utilities (Bulk only, require billingMonth) - allow create & update
+    match /utilities/{docId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() &&
+        ('category' in request.resource.data) &&
+        request.resource.data.category is string &&
+        request.resource.data.category.matches('(?i)^bulk') &&
+        ('billingMonth' in request.resource.data) &&
+        request.resource.data.billingMonth is string &&
+        request.resource.data.billingMonth.size() > 0;
+      allow delete: if false;
+    }
+
+    // Admin/other
+    match /adminConfig/{docId} { allow read, write: if isSignedIn(); }
+    match /dashboardStats/{docId} { allow read: if true; allow write: if isSignedIn(); }
+    match /users/{userId} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+    match /regions/{regionId} { allow read: if true; allow write: if isSignedIn(); }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
